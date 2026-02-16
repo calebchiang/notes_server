@@ -49,11 +49,7 @@ func CreateNotebook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id":    notebook.ID,
-		"title": notebook.Title,
-		"color": notebook.Color,
-	})
+	c.JSON(http.StatusCreated, notebook)
 }
 
 func GetNotebooks(c *gin.Context) {
