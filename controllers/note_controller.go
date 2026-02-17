@@ -172,3 +172,58 @@ func DeleteNote(c *gin.Context) {
 		"message": "Note deleted successfully",
 	})
 }
+
+func UpdateNote(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized",
+		})
+		return
+	}
+
+	noteID := c.Param("note_id")
+	notebookID := c.Param("id")
+
+	var note models.Note
+
+	// Ensure note belongs to the logged in user and notebook
+	if err := database.DB.
+		Where("id = ? AND notebook_id = ? AND user_id = ?", noteID, notebookID, userID.(uint)).
+		First(&note).Error; err != nil {
+
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Note not found",
+		})
+		return
+	}
+
+	var input struct {
+		Title   *string `json:"title"`
+		Content *string `json:"content"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid request body",
+		})
+		return
+	}
+
+	if input.Title != nil {
+		note.Title = *input.Title
+	}
+
+	if input.Content != nil {
+		note.Content = *input.Content
+	}
+
+	if err := database.DB.Save(&note).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update note",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, note)
+}

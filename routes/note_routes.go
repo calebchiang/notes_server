@@ -13,5 +13,6 @@ func NoteRoutes(r *gin.Engine) {
 		auth.POST("", controllers.CreateNote)
 		auth.GET("", controllers.GetNotes)
 		auth.DELETE("/:note_id", controllers.DeleteNote)
+		auth.PATCH("/:note_id", controllers.UpdateNote)
 	}
 }
