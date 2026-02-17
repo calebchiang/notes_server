@@ -70,12 +70,7 @@ func CreateNote(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id":         note.ID,
-		"title":      note.Title,
-		"content":    note.Content,
-		"notebookId": note.NotebookID,
-	})
+	c.JSON(http.StatusCreated, note)
 }
 
 func GetNotes(c *gin.Context) {
