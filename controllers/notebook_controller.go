@@ -10,8 +10,9 @@ import (
 
 func CreateNotebook(c *gin.Context) {
 	var input struct {
-		Title string `json:"title"`
-		Color string `json:"color"`
+		Title    string `json:"title"`
+		Color    string `json:"color"`
+		Category string `json:"category"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -37,9 +38,10 @@ func CreateNotebook(c *gin.Context) {
 	}
 
 	notebook := models.Notebook{
-		UserID: userID.(uint),
-		Title:  input.Title,
-		Color:  input.Color,
+		UserID:   userID.(uint),
+		Title:    input.Title,
+		Color:    input.Color,
+		Category: input.Category,
 	}
 
 	if err := database.DB.Create(&notebook).Error; err != nil {
@@ -96,7 +98,6 @@ func DeleteNotebook(c *gin.Context) {
 
 	var notebook models.Notebook
 
-	// Ensure notebook belongs to logged-in user
 	if err := database.DB.
 		Where("id = ? AND user_id = ?", notebookID, userID.(uint)).
 		First(&notebook).Error; err != nil {
