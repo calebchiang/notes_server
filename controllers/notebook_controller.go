@@ -63,13 +63,38 @@ func GetNotebooks(c *gin.Context) {
 		return
 	}
 
-	var notebooks []models.Notebook
+	type NotebookWithCount struct {
+		ID        uint   `json:"id"`
+		UserID    uint   `json:"user_id"`
+		Title     string `json:"title"`
+		Color     string `json:"color"`
+		Category  string `json:"category"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+		NoteCount int    `json:"note_count"`
+	}
 
-	if err := database.DB.
-		Where("user_id = ?", userID.(uint)).
-		Order("created_at desc").
-		Find(&notebooks).Error; err != nil {
+	var notebooks []NotebookWithCount
 
+	err := database.DB.
+		Table("notebooks").
+		Select(`
+			notebooks.id,
+			notebooks.user_id,
+			notebooks.title,
+			notebooks.color,
+			notebooks.category,
+			notebooks.created_at,
+			notebooks.updated_at,
+			COUNT(notes.id) as note_count
+		`).
+		Joins("LEFT JOIN notes ON notes.notebook_id = notebooks.id").
+		Where("notebooks.user_id = ?", userID.(uint)).
+		Group("notebooks.id").
+		Order("notebooks.created_at desc").
+		Scan(&notebooks).Error
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to fetch notebooks",
 		})
