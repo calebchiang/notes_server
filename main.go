@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/calebchiang/notes_server/database"
 	"github.com/calebchiang/notes_server/models"
 	"github.com/calebchiang/notes_server/routes"
@@ -22,6 +24,12 @@ func main() {
 	routes.UserRoutes(r)
 	routes.NotebookRoutes(r)
 	routes.NoteRoutes(r)
+	routes.YouTubeRoutes(r)
 
-	r.Run()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	r.Run(":" + port)
 }
