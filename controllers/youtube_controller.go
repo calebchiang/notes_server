@@ -1,10 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/calebchiang/notes_server/database"
 	"github.com/calebchiang/notes_server/models"
@@ -69,18 +69,19 @@ func GenerateTranscript(c *gin.Context) {
 
 	os.Remove(rawFile)
 
-	var builder strings.Builder
-	for _, seg := range structuredTranscript.Segments {
-		builder.WriteString(seg.Text)
-		builder.WriteString(" ")
+	rawJSONBytes, err := json.Marshal(structuredTranscript)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to serialize transcript",
+		})
+		return
 	}
-	fullText := strings.TrimSpace(builder.String())
 
 	transcript := models.Transcript{
-		NoteID:   input.NoteID,
-		FullText: fullText,
-		Source:   "youtube",
-		SourceID: videoID,
+		NoteID:         input.NoteID,
+		TranscriptJSON: string(rawJSONBytes),
+		Source:         "youtube",
+		SourceID:       videoID,
 	}
 
 	if err := database.DB.
