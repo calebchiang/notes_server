@@ -18,6 +18,7 @@ func main() {
 		&models.User{},
 		&models.Notebook{},
 		&models.Note{},
+		&models.Transcript{},
 	)
 
 	r := gin.Default()
