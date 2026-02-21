@@ -111,3 +111,33 @@ func LoginUser(c *gin.Context) {
 		"token": tokenString,
 	})
 }
+
+func GetCurrentUser(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized",
+		})
+		return
+	}
+
+	var user models.User
+
+	if err := database.DB.
+		Select("id, name, email, credits").
+		Where("id = ?", userID.(uint)).
+		First(&user).Error; err != nil {
+
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "User not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":      user.ID,
+		"name":    user.Name,
+		"email":   user.Email,
+		"credits": user.Credits,
+	})
+}
